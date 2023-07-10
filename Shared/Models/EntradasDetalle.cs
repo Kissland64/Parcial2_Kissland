@@ -1,9 +1,13 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+
 public class EntradasDetalle
 {
+    [Key]
     public int DetalleId {get; set;}
+    [Required(ErrorMessage = "Este campo es necesario")]
     public int EntradaId {get; set;}
+    [Required(ErrorMessage = "Este campo es necesario")]
     public int ProductoId {get; set;}
+    [Required(ErrorMessage = "Este campo es necesario")]
     public string CantidadUtilizada {get; set;}
 }
