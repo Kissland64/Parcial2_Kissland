@@ -11,3 +11,4 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<NotificationService>();
 
 await builder.Build().RunAsync();
+
