@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class EntradasProducto{
+public class Entradas{
 
     [Key]
     public int EntradaId {get; set;}
@@ -16,5 +16,5 @@ public class EntradasProducto{
     [Required(ErrorMessage = "Este campo es necesario")]
 
     [ForeignKey("DetalleId")]
-    public ICollection<ProductoDetalle> ProductoDetalles { get; set; } = new List<ProductoDetalle>();
+    public ICollection<EntradasDetalle> EntradasDetallesDetalles { get; set; } = new List<EntradasDetalle>();
 }
