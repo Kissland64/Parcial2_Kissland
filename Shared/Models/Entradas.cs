@@ -16,5 +16,5 @@ public class Entradas{
     [Required(ErrorMessage = "Este campo es necesario")]
 
     [ForeignKey("DetalleId")]
-    public ICollection<EntradasDetalle> EntradasDetallesDetalles { get; set; } = new List<EntradasDetalle>();
+    public ICollection<EntradasDetalle> EntradasDetalles { get; set; } = new List<EntradasDetalle>();
 }

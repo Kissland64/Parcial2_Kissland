@@ -10,10 +10,10 @@ public class Context : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
-        modelBuilder.Entity<Productos>().HasData
-        (
-            new Productos
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Productos>().HasData(new List<Productos>()
+        {
+        new Productos
             {
                 ProductoId = 1,
                 Descripcion ="Mani",
@@ -62,6 +62,6 @@ public class Context : DbContext
                 Tipo = 1,
                 Existencia = 0,
             }
-        );
+        });
     }
 }

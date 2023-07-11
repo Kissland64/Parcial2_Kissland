@@ -34,7 +34,7 @@ namespace Parcial2_Kissland.Server.Controllers
                 return NotFound();
             }
             var entradas = await _context.entradas
-            .Include(c => c.EntradasDetallesDetalles)
+            .Include(c => c.EntradasDetalles)
             .Where(c => c.EntradaId == id)
             .FirstOrDefaultAsync();
 
