@@ -1,4 +1,4 @@
-@page "/Entradas"
+@page "/EntradasConsulta"
 
 @inject HttpClient httpClient
 
@@ -6,7 +6,7 @@
     <div class="card">
 
         <div class="card-header">
-            <h3> Consulta de Cliente </h3>
+            <h3> Consulta de entradas </h3>
         </div>
 
         <div class="card-body">
@@ -78,6 +78,7 @@
         </div>
     </div>
 </div>
+
 @code {
     public List<Entradas>? Entradas { get; set; }
     public int conteo { get; set; }
@@ -90,6 +91,5 @@
 
         conteo = Entradas != null ? Entradas!.Count() : 0;
         StateHasChanged();
-
     }
 }
