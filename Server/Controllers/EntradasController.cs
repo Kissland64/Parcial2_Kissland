@@ -53,12 +53,12 @@ namespace Parcial2_Kissland.Server.Controllers
             if (!EntradasExists(entradas.EntradaId))
             {
                 Productos? productos; 
-                foreach(var consumido in entradas.EntradasDetalles)
+                foreach(var agotado in entradas.EntradasDetalles)
                 {
-                    productos = _context.Productos.Find(consumido.ProductoId);
-                    productos.Existencia -= (double)consumido.CantidadUtilizada;
+                    productos = _context.Productos.Find(agotado.ProductoId);
+                    productos.Existencia -= (double)agotado.CantidadUtilizada;
                     _context.Entry(productos).State = EntityState.Modified;
-                    _context.Entry(consumido).State = EntityState.Added;
+                    _context.Entry(agotado).State = EntityState.Added;
 
                 }
                 _context.Entradas.Add(entradas);
@@ -70,22 +70,22 @@ namespace Parcial2_Kissland.Server.Controllers
                     .AsNoTracking()
                     .FirstOrDefault(e => e.EntradaId == entradas.EntradaId);
                 Productos? productos;
-                foreach (var consumido in entradaAnterior.EntradasDetalles)
+                foreach (var agotado in entradaAnterior.EntradasDetalles)
                 {
-                    productos = _context.Productos.Find(consumido.ProductoId);
-                    productos.Existencia += (double)consumido.CantidadUtilizada;
+                    productos = _context.Productos.Find(agotado.ProductoId);
+                    productos.Existencia += (double)agotado.CantidadUtilizada;
                     _context.Entry(productos).State = EntityState.Modified;
                 }
                 productos = _context.Productos.Find(entradaAnterior.ProductoId);
                 productos.Existencia -= entradaAnterior.CantidadProducida;
                 _context.Entry(productos).State = EntityState.Modified;
                 _context.Database.ExecuteSqlRaw($"Delete from EntradasDetalles where EntradaId = {entradas.EntradaId}");
-                foreach (var consumido in entradas.EntradasDetalles)
+                foreach (var agotado in entradas.EntradasDetalles)
                 {
-                    productos = _context.Productos.Find(consumido.ProductoId);
-                    productos.Existencia -= (double)consumido.CantidadUtilizada;
+                    productos = _context.Productos.Find(agotado.ProductoId);
+                    productos.Existencia -= (double)agotado.CantidadUtilizada;
                     _context.Entry(productos).State = EntityState.Modified;
-                    _context.Entry(consumido).State = EntityState.Added;
+                    _context.Entry(agotado).State = EntityState.Added;
                 }
                 productos = _context.Productos.Find(entradas.ProductoId);
                 productos.Existencia += entradas.CantidadProducida;
@@ -111,10 +111,10 @@ namespace Parcial2_Kissland.Server.Controllers
                 return NotFound();
             }
             Productos? productos;
-            foreach (var consumido in entradas.EntradasDetalles)
+            foreach (var agotado in entradas.EntradasDetalles)
             {
-                productos = _context.Productos.Find(consumido.ProductoId);
-                productos.Existencia += (double)consumido.CantidadUtilizada;
+                productos = _context.Productos.Find(agotado.ProductoId);
+                productos.Existencia += (double)agotado.CantidadUtilizada;
                 _context.Entry(productos).State = EntityState.Modified;
             }
             productos = _context.Productos.Find(entradas.ProductoId);
