@@ -101,7 +101,7 @@ namespace Parcial2_Kissland.Server.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEntradas(int id)
         {
-            if (_context.Entradas == null)
+            if(_context.Entradas == null)
             {
                 return NotFound();
             }
@@ -110,9 +110,20 @@ namespace Parcial2_Kissland.Server.Controllers
             {
                 return NotFound();
             }
-
+            Productos? productos;
+            foreach (var consumido in entradas.EntradasDetalles)
+            {
+                productos = _context.Productos.Find(consumido.ProductoId);
+                productos.Existencia += (double)consumido.CantidadUtilizada;
+                _context.Entry(productos).State = EntityState.Modified;
+            }
+            productos = _context.Productos.Find(entradas.ProductoId);
+            productos.Existencia -= entradas.CantidadProducida;
+            _context.Entry(productos).State = EntityState.Modified;
+            _context.Database.ExecuteSqlRaw($"Delete from EntradasDetalles where EntradaId = {entradas.EntradaId}");
             _context.Entradas.Remove(entradas);
             await _context.SaveChangesAsync();
+            _context.Entry(entradas).State = EntityState.Detached;
 
             return NoContent();
         }
