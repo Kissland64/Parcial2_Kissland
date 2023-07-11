@@ -51,12 +51,50 @@ namespace Parcial2_Kissland.Server.Controllers
         public async Task<ActionResult<Entradas>> PostEntradas(Entradas entradas)
         {
             if (!EntradasExists(entradas.EntradaId))
-                _context.Entradas.Add(entradas);
-            else
-                _context.Entradas.Update(entradas);
+            {
+                Productos? productos; 
+                foreach(var consumido in entradas.EntradasDetalles)
+                {
+                    productos = _context.Productos.Find(consumido.ProductoId);
+                    productos.Existencia -= (double)consumido.CantidadUtilizada;
+                    _context.Entry(productos).State = EntityState.Modified;
+                    _context.Entry(consumido).State = EntityState.Added;
 
+                }
+                _context.Entradas.Add(entradas);
+            }
+            else
+            {
+                var entradaAnterior = _context.Entradas
+                    .Include(e => e.EntradasDetalles)
+                    .AsNoTracking()
+                    .FirstOrDefault(e => e.EntradaId == entradas.EntradaId);
+                Productos? productos;
+                foreach (var consumido in entradaAnterior.EntradasDetalles)
+                {
+                    productos = _context.Productos.Find(consumido.ProductoId);
+                    productos.Existencia += (double)consumido.CantidadUtilizada;
+                    _context.Entry(productos).State = EntityState.Modified;
+                }
+                productos = _context.Productos.Find(entradaAnterior.ProductoId);
+                productos.Existencia -= entradaAnterior.CantidadProducida;
+                _context.Entry(productos).State = EntityState.Modified;
+                _context.Database.ExecuteSqlRaw($"Delete from EntradasDetalles where EntradaId = {entradas.EntradaId}");
+                foreach (var consumido in entradas.EntradasDetalles)
+                {
+                    productos = _context.Productos.Find(consumido.ProductoId);
+                    productos.Existencia -= (double)consumido.CantidadUtilizada;
+                    _context.Entry(productos).State = EntityState.Modified;
+                    _context.Entry(consumido).State = EntityState.Added;
+                }
+                productos = _context.Productos.Find(entradas.ProductoId);
+                productos.Existencia += entradas.CantidadProducida;
+                _context.Entry(productos).State = EntityState.Modified;
+                _context.Entradas.Update(entradas);
+            }
+            _context.Entry(entradas).State = EntityState.Detached;
             await _context.SaveChangesAsync();
-            return Ok(entradas);
+            return Ok(entradas);           
         }
 
         // DELETE: api/Entradas/5
