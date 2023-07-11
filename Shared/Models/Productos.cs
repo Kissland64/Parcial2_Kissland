@@ -8,7 +8,7 @@ public class Productos{
     [Required(ErrorMessage = "Este campo es necesario")]
     public string Descripcion {get; set;}
     [Required(ErrorMessage = "Este campo es necesario")]
-    public string Tipo {get; set;}
+    public int Tipo {get; set;}
     [Required(ErrorMessage = "Este campo es necesario")]
-    public string Existencia {get; set;}
+    public int Existencia {get; set;}
 }
