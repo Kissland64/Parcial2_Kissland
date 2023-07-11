@@ -9,10 +9,10 @@ public class Entradas{
     [Required(ErrorMessage = "Este campo es necesario")]
     public string Concepto {get; set;}
     [Required(ErrorMessage = "Este campo es necesario")]
-    public string PesoTotal {get; set;}
+    public double PesoTotal {get; set;}
     public int ProductoId {get; set;}
     [Required(ErrorMessage = "Este campo es necesario")]
-    public string CantidadProducida {get; set;}
+    public double CantidadProducida {get; set;}
     [Required(ErrorMessage = "Este campo es necesario")]
 
     [ForeignKey("DetalleId")]
