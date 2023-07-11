@@ -1,0 +1,303 @@
+@page "/EntradaProductos"
+@page "/EntradaProductos/{EntradaId:int}"
+@using Parcial2_Kissland.Client.Extensors;
+@inject HttpClient httpClient
+@inject NotificationService notificationService
+
+<EditForm Model="entradas" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header">
+                <h3>Entradas de Productos.</h3>
+            </div>
+            <div class="card-body">
+
+                <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
+                    <label>Id:</label>
+                    <div class="input-group mb-3">
+                        <InputNumber @bind-Value="entradas.EntradaId" class="form-control" aria-describedby="BotonBuscar" />
+                        <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="oi oi-magnifying-glass" /></button>
+                    </div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label class="row-text">Fecha</label>
+                    <div class="input-group">
+                        <input type="date" @bind="@entradas.Fecha" />
+                        <ValidationMessage For="@(() => entradas.Fecha)" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="Concepto">Concepto:</label>
+                    <InputText @bind-Value="entradas.Concepto" class="form-control" />
+                    <ValidationMessage For="@(() => entradas.Concepto)" />
+                </div>
+
+                <RadzenFieldset>
+                    <HeaderTemplate>
+                        <span class="d-inline-flex align-items-center align-middle">
+                            <RadzenIcon Icon="account_box" class="me-1" /><b>Utilizadas</b>
+                        </span>
+                    </HeaderTemplate>
+                    <ChildContent>
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Producto" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenDropDown class="w-100" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                Data="@L_Productos" TextProperty="Descripcion" ValueProperty="ProductoId" AllowClear="true" @bind-Value="@entradasDetalle.ProductoId" />
+                                <RadzenRequiredValidator Component="Producto" Text="Campo requerido" Popup="true" Style="position: absolute" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Cantidad" />
+                            </div>
+                            <div class="col-md-8 align-items-center d-flex">
+                                <RadzenNumeric style="width: 100%;" Name="Cantidad" @bind-Value="@entradasDetalle.CantidadUtilizada" />
+                                <RadzenRequiredValidator Component="Cantidad" Text="Campo requerido" />
+                                <RadzenButton Click="AgregarDetalle" Icon="east" />
+                            </div>
+                        </div>
+                        <hr>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ProductoId</th>
+                                    <th>Descripcion</th>
+                                    <th>Cantidad</th>
+                                    <th>Funciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in entradas.EntradasDetalles)
+                                {
+                                    <tr>
+                                        <td>@item.ProductoId</td>
+                                        <td>@L_Productos.FirstOrDefault(p => p.ProductoId == item.ProductoId)?.Descripcion</td>
+                                        <td>@item.CantidadUtilizada</td>
+                                        <td><RadzenButton ButtonStyle="ButtonStyle.Danger" Click="()=>EliminarDetalle(item)" Icon="delete" /></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </ChildContent>
+                </RadzenFieldset>
+                <RadzenFieldset>
+                    <HeaderTemplate>
+                        <span class="d-inline-flex align-items-center align-middle">
+                            <RadzenIcon Icon="account_box" class="me-1" /><b>Producto Producido</b>
+                        </span>
+                    </HeaderTemplate>
+                    <ChildContent>
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Producto Producido" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                Data="@L_Productos.Where(o => o.Descripcion.Contains("Sobre"))" Name="Generado" TextProperty="Descripcion" ValueProperty="ProductoId" AllowClear="true" @bind-Value="@entradas.ProductoId" />
+                                <RadzenRequiredValidator Component="Generado" Text="Campo requerido" Popup="true" Style="position: absolute" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Cantidad Total" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenNumeric style="width: 100%;" Name="Total" @bind-Value="entradas.CantidadProducida" />
+                                <RadzenRequiredValidator Component="Total" Text="Campo requerido" Popup="true" Style="position: absolute" />
+                            </div>
+                        </div>
+
+                    </ChildContent>
+                </RadzenFieldset>
+
+                <div style="display:flex; justify-content:center; padding:30px;"></div>
+
+                <div class="card-footer d-flex justify-content-center">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
+                        <button type="submit" class="btn btn-outline-success">Guardar <i class="oi oi-document" /></button>
+                        <button type="button" class="btn btn-outline-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+@code
+{
+    [Parameter]
+    public int EntradaId { get; set; }
+
+    public int ProductoId { get; set; }
+
+    public Entradas entradas { get; set; } = new Entradas();
+
+    public EntradasDetalle entradasDetalle { get; set; } = new EntradasDetalle();
+
+    public int Total { get; set; } = 0;
+
+    public int Cantidad { get; set; }
+
+    public List<Productos> L_Productos { get; set; } = new List<Productos>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var Productos = await httpClient.GetFromJsonAsync<List<Productos>>($"api/Productos");
+
+        if (Productos is not null)
+        {
+            L_Productos = Productos;
+        }
+    }
+
+    public void Nuevo()
+    {
+        this.entradas = new Entradas();
+    }
+
+    public async Task Buscar()
+    {
+        var entradaEncontrada = await httpClient.GetFromJsonAsync<Entradas>($"api/Entradas/{entradas.EntradaId}");
+
+        if (entradaEncontrada != null)
+        {
+            this.entradas = entradaEncontrada;
+            StateHasChanged();
+            notificationService.ShowNotification(titulo: "Encontrado", mensaje: "La entrada se ha encontrado con exito", NotificationSeverity.Info);
+        }
+        else
+        {
+            notificationService.ShowNotification(titulo: "No encontrado", mensaje: "Esa entrada no existe", NotificationSeverity.Error);
+        }
+    }
+
+    public bool Validar()
+    {
+        if (string.IsNullOrEmpty(entradas.Concepto))
+        {
+            return false;
+        }
+        if (entradas.PesoTotal < 0)
+        {
+            return false;
+        }
+        if (entradas.ProductoId < 0)
+        {
+            return false;
+        }
+        if (entradas.CantidadProducida < 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    public bool ValidarDetalle()
+    {
+        if (entradasDetalle.ProductoId < 0)
+        {
+            return false;
+        }
+        if (entradasDetalle.CantidadUtilizada < 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    public async Task Guardar()
+    {
+        using var response = await httpClient.PostAsJsonAsync("api/Entrada", entradas);
+
+        if (Validar())
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            var entradaDevuelta = await response.Content.ReadFromJsonAsync<Entradas>();
+
+            if (entradaDevuelta is not null)
+            {
+                this.entradas = entradaDevuelta;
+                StateHasChanged();
+                Nuevo();
+            }
+        }
+    }
+
+    public async Task Eliminar()
+    {
+        using var response = await httpClient.DeleteAsync($"api/Entrada/{entradas.EntradaId}");
+
+        if (Validar())
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                return;
+            }
+            else
+            {
+                Nuevo();
+            }
+        }
+    }
+
+    private async Task<Entradas> BuscarEntradas(int EntradaId)
+    {
+        Entradas entradas = new Entradas();
+        var entradaEncontrada = await httpClient.GetFromJsonAsync<Entradas>($"api/Entradas/{entradas.EntradaId}");
+
+        if (entradaEncontrada != null)
+        {
+            return entradas = entradaEncontrada;
+        }
+        else
+        {
+            return new Entradas();
+        }
+    }
+
+    public void AgregarDetalle()
+    {
+        if (ValidarDetalle())
+        {
+            if (entradas != null)
+            {
+                entradasDetalle.EntradaId = entradas.EntradaId;
+
+                entradas.EntradasDetalles.Add(entradasDetalle);
+                entradasDetalle = new EntradasDetalle();
+            }
+        }
+    }
+
+    public void EliminarDetalle(EntradasDetalle detalle)
+    {
+        var detalleEncontrado = entradas.EntradasDetalles.First(e => e.DetalleId == detalle.DetalleId);
+
+    if (detalleEncontrado != null)
+        {
+            var entrada = BuscarEntradas(detalleEncontrado.ProductoId);
+            detalle = detalleEncontrado;
+            entradas.EntradasDetalles.Remove(detalle);
+        }
+    }
+}
