@@ -18,22 +18,22 @@ namespace Parcial2_Kissland.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Entradas>>> GetEntradas()
         {
-            if (_context.entradas == null)
+            if (_context.Entradas == null)
             {
                 return NotFound();
             }
-            return await _context.entradas.ToListAsync();
+            return await _context.Entradas.ToListAsync();
         }
 
         // GET: api/Entradas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Entradas>> GetEntradas(int id)
         {
-            if (_context.entradas == null)
+            if (_context.Entradas == null)
             {
                 return NotFound();
             }
-            var entradas = await _context.entradas
+            var entradas = await _context.Entradas
             .Include(c => c.EntradasDetalles)
             .Where(c => c.EntradaId == id)
             .FirstOrDefaultAsync();
@@ -51,9 +51,9 @@ namespace Parcial2_Kissland.Server.Controllers
         public async Task<ActionResult<Entradas>> PostEntradas(Entradas entradas)
         {
             if (!EntradasExists(entradas.EntradaId))
-                _context.entradas.Add(entradas);
+                _context.Entradas.Add(entradas);
             else
-                _context.entradas.Update(entradas);
+                _context.Entradas.Update(entradas);
 
             await _context.SaveChangesAsync();
             return Ok(entradas);
@@ -63,17 +63,17 @@ namespace Parcial2_Kissland.Server.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEntradas(int id)
         {
-            if (_context.entradas == null)
+            if (_context.Entradas == null)
             {
                 return NotFound();
             }
-            var entradas = await _context.entradas.FindAsync(id);
+            var entradas = await _context.Entradas.FindAsync(id);
             if (entradas == null)
             {
                 return NotFound();
             }
 
-            _context.entradas.Remove(entradas);
+            _context.Entradas.Remove(entradas);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -81,7 +81,7 @@ namespace Parcial2_Kissland.Server.Controllers
 
         private bool EntradasExists(int id)
         {
-            return (_context.entradas?.Any(e => e.EntradaId == id)).GetValueOrDefault();
+            return (_context.Entradas?.Any(e => e.EntradaId == id)).GetValueOrDefault();
         }
     }
 }
