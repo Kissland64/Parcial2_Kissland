@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 public class Context : DbContext
@@ -12,7 +13,7 @@ public class Context : DbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Productos>().HasData(new List<Productos>()
         {
-        new Productos
+            new Productos
             {
                 ProductoId = 1,
                 Descripcion ="Mani",
