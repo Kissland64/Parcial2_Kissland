@@ -8,5 +8,5 @@ public class EntradasDetalle
     [Required(ErrorMessage = "Este campo es necesario")]
     public int ProductoId {get; set;}
     [Required(ErrorMessage = "Este campo es necesario")]
-    public string CantidadUtilizada {get; set;}
+    public double CantidadUtilizada {get; set;}
 }
