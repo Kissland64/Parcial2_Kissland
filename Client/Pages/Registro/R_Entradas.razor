@@ -1,6 +1,6 @@
 @page "/EntradaProductos"
 @page "/EntradaProductos/{EntradaId:int}"
-@using Parcial2_Kissland.Client.Extensors;
+@using Parcial2_Kissland.Client.Extensors
 @inject HttpClient httpClient
 @inject NotificationService notificationService
 
@@ -10,149 +10,136 @@
     <div class="container">
         <div class="card shadow-lg">
             <div class="card-header">
-                <h3>Entradas de Productos.</h3>
+                <h3>Registro de entrada y productos.</h3>
             </div>
-            <div class="card-body">
-
+            <div class=card-body>
                 <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
-                    <label>Id:</label>
+                    <label>Entrada Id:</label>
                     <div class="input-group mb-3">
                         <InputNumber @bind-Value="entradas.EntradaId" class="form-control" aria-describedby="BotonBuscar" />
-                        <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="oi oi-magnifying-glass" /></button>
+                        <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="oi oi-magnifying-glass"></i></button>
                     </div>
                 </div>
 
-                <div class="form-group mt-3">
-                    <label class="row-text">Fecha</label>
-                    <div class="input-group">
-                        <input type="date" @bind="@entradas.Fecha" />
-                        <ValidationMessage For="@(() => entradas.Fecha)" />
+                <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
+                    <label>Producto Id:</label>
+                    <div class="input-group mb-3">
+                        <InputNumber @bind-Value="entradas.ProductoId" class="form-control" aria-describedby="BotonBuscar" />
+                        <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="oi oi-magnifying-glass"></i></button>
                     </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="Fecha">Fecha:</label>
+                    <InputDate @bind-Value="entradas.Fecha" class="form-control" />
+                    <ValidationMessage For="() => entradas.Fecha" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="Concepto">Concepto:</label>
                     <InputText @bind-Value="entradas.Concepto" class="form-control" />
-                    <ValidationMessage For="@(() => entradas.Concepto)" />
+                    <ValidationMessage For="() => entradas.Concepto" />
                 </div>
 
-                <RadzenFieldset>
-                    <HeaderTemplate>
-                        <span class="d-inline-flex align-items-center align-middle">
-                            <RadzenIcon Icon="account_box" class="me-1" /><b>Utilizadas</b>
-                        </span>
-                    </HeaderTemplate>
-                    <ChildContent>
-                        <div class="row">
-                            <div class="col-md-4 align-items-center d-flex">
-                                <RadzenLabel Text="Producto" />
-                            </div>
-                            <div class="col-md-8">
-                                <RadzenDropDown class="w-100" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                                Data="@L_Productos" TextProperty="Descripcion" ValueProperty="ProductoId" AllowClear="true" @bind-Value="@entradasDetalle.ProductoId" />
-                                <RadzenRequiredValidator Component="Producto" Text="Campo requerido" Popup="true" Style="position: absolute" />
+                <div class="mb-3">
+                    <label class="form-label" for="PesoTotal">PesoTotal:</label>
+                    <InputNumber @bind-Value="entradas.PesoTotal" class="form-control" />
+                    <ValidationMessage For="() => entradas.PesoTotal" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="CantidadProducida">CantidadProducida:</label>
+                    <InputNumber @bind-Value="entradas.CantidadProducida" class="form-control" />
+                    <ValidationMessage For="() => entradas.CantidadProducida" />
+                </div>
+
+                <hr>
+                <fieldset>
+                    <legend>Utilizados:</legend>
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="SelectP">Producto:</label>
+                            <RadzenDropDown class="form-control" Data="@L_Productos.Where(p => p.ProductoId != 5)" TextProperty="Descripcion" ValueProperty="ProductoId" @bind-Value="@entradasDetalle.ProductoId"></RadzenDropDown>
+                        </div>
+                        <div class="col-4">
+                            <label for="CantidadP">Cantidad:</label>
+                            <div class="input-group">
+                                <input @bind="@entradasDetalle.CantidadUtilizada" type="Text" id="CantidadP" class="form-control" />
+                                <button type="button" class="btn btn-dark" @onclick="AgregarDetalle">Agregar <i class="oi oi-plus" /></button>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-4 align-items-center d-flex">
-                                <RadzenLabel Text="Cantidad" />
-                            </div>
-                            <div class="col-md-8 align-items-center d-flex">
-                                <RadzenNumeric style="width: 100%;" Name="Cantidad" @bind-Value="@entradasDetalle.CantidadUtilizada" />
-                                <RadzenRequiredValidator Component="Cantidad" Text="Campo requerido" />
-                                <RadzenButton Click="AgregarDetalle" Icon="east" />
-                            </div>
-                        </div>
-                        <hr>
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ProductoId</th>
-                                    <th>Descripcion</th>
-                                    <th>Cantidad</th>
-                                    <th>Funciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in entradas.EntradasDetalles)
-                                {
-                                    <tr>
-                                        <td>@item.ProductoId</td>
-                                        <td>@L_Productos.FirstOrDefault(p => p.ProductoId == item.ProductoId)?.Descripcion</td>
-                                        <td>@item.CantidadUtilizada</td>
-                                        <td><RadzenButton ButtonStyle="ButtonStyle.Danger" Click="()=>EliminarDetalle(item)" Icon="delete" /></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </ChildContent>
-                </RadzenFieldset>
-                <RadzenFieldset>
-                    <HeaderTemplate>
-                        <span class="d-inline-flex align-items-center align-middle">
-                            <RadzenIcon Icon="account_box" class="me-1" /><b>Producto Producido</b>
-                        </span>
-                    </HeaderTemplate>
-                    <ChildContent>
-                        <div class="row">
-                            <div class="col-md-4 align-items-center d-flex">
-                                <RadzenLabel Text="Producto Producido" />
-                            </div>
-                            <div class="col-md-8">
-                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
-                                Data="@L_Productos.Where(o => o.Descripcion.Contains("Sobre"))" Name="Generado" TextProperty="Descripcion" ValueProperty="ProductoId" AllowClear="true" @bind-Value="@entradas.ProductoId" />
-                                <RadzenRequiredValidator Component="Generado" Text="Campo requerido" Popup="true" Style="position: absolute" />
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4 align-items-center d-flex">
-                                <RadzenLabel Text="Cantidad Total" />
-                            </div>
-                            <div class="col-md-8">
-                                <RadzenNumeric style="width: 100%;" Name="Total" @bind-Value="entradas.CantidadProducida" />
-                                <RadzenRequiredValidator Component="Total" Text="Campo requerido" Popup="true" Style="position: absolute" />
-                            </div>
-                        </div>
-
-                    </ChildContent>
-                </RadzenFieldset>
-
-                <div style="display:flex; justify-content:center; padding:30px;"></div>
-
-                <div class="card-footer d-flex justify-content-center">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-outline-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
-                        <button type="submit" class="btn btn-outline-success">Guardar <i class="oi oi-document" /></button>
-                        <button type="button" class="btn btn-outline-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
                     </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ProductoId</th>
+                                <th>Descripción</th>
+                                <th>Cantidad</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in entradas.EntradasDetalles)
+                            {
+                                <tr>
+                                    <td>@item.ProductoId</td>
+                                    <td>@L_Productos.FirstOrDefault(p => p.ProductoId == item.ProductoId)?.Descripcion</td>
+                                    <td>@item.CantidadUtilizada</td>
+                                    <td>
+                                        <button class="btn btn-danger mr-2" onclick="@(() => EliminarDetalle(item))"><i class="oi oi-trash"></i></button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <hr>
+                    <div class="row d-flex justify-content-center">
+                        <div class="col-5">
+                            <label for="Total">Cantidades totales utilizadas:</label>
+                            <input @bind="@Total" disabled="true" type="text" class="form-control" />
+                        </div>
+                    </div>
+                </fieldset>
+                <hr>
+                <fieldset>
+                    <legend>Producido:</legend>
+                    <div class="row">
+                        <div class="col-3">
+                            <RadzenDropDown class="form-control" Data="@L_Productos" TextProperty="Descripcion" ValueProperty="ProductoId" @bind-Value="@entradas.ProductoId"></RadzenDropDown>
+                        </div>
+                        <div class="col-2">
+                            <input @bind="@entradas.CantidadProducida" type="text" class="form-control" placeholder="Cantidad" />
+                        </div>
+                    </div>
+                </fieldset>
+
+            </div>
+            <div class="card-footer d-flex justify-content-center">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file"></i></button>
+                    <button type="submit" class="btn btn-outline-success">Guardar <i class="oi oi-document"></i></button>
+                    <button type="button" class="btn btn-outline-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash"></i></button>
                 </div>
             </div>
         </div>
     </div>
 </EditForm>
+<label>@Mensaje</label>
 
-
-@code
-{
+@code {
     [Parameter]
     public int EntradaId { get; set; }
-
     public int ProductoId { get; set; }
-
     public Entradas entradas { get; set; } = new Entradas();
-
     public EntradasDetalle entradasDetalle { get; set; } = new EntradasDetalle();
-
+    public string Mensaje { get; set; } = string.Empty;
     public int Total { get; set; } = 0;
-
     public int Cantidad { get; set; }
-
     public List<Productos> L_Productos { get; set; } = new List<Productos>();
-
+    
     protected override async Task OnInitializedAsync()
     {
-        var Productos = await httpClient.GetFromJsonAsync<List<Productos>>($"api/Productos");
+        var Productos = await httpClient.GetFromJsonAsync<List<Productos>>("api/Productos");
 
         if (Productos is not null)
         {
@@ -163,21 +150,79 @@
     public void Nuevo()
     {
         this.entradas = new Entradas();
+        Mensaje = string.Empty;
     }
-
+    
     public async Task Buscar()
     {
-        var entradaEncontrada = await httpClient.GetFromJsonAsync<Entradas>($"api/Entradas/{entradas.EntradaId}");
-
-        if (entradaEncontrada != null)
+        try
         {
-            this.entradas = entradaEncontrada;
-            StateHasChanged();
-            notificationService.ShowNotification(titulo: "Encontrado", mensaje: "La entrada se ha encontrado con exito", NotificationSeverity.Info);
+            var entradaEncontrada = await httpClient.GetFromJsonAsync<Entradas>($"api/Entradas/{entradas.EntradaId}");
+            if (entradaEncontrada != null)
+            {
+                this.entradas = entradaEncontrada;
+            }
+            else
+            {
+                notificationService.ShowNotification(
+                    titulo: "Error de búsqueda",
+                    mensaje: "Registro no encontrado",
+                    NotificationSeverity.Error);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            notificationService.ShowNotification(titulo: "No encontrado", mensaje: "Esa entrada no existe", NotificationSeverity.Error);
+            notificationService.ShowNotification(
+                titulo: "Error de búsqueda",
+                mensaje: ex.Message,
+                NotificationSeverity.Error);
+        }
+    }
+
+    public async Task Guardar()
+    {
+        try
+        {
+            using var response = await httpClient.PostAsJsonAsync("api/Entradas", entradas);
+            response.EnsureSuccessStatusCode();
+
+            var entradaDevuelta = await response.Content.ReadFromJsonAsync<Entradas>();
+            if (entradaDevuelta != null)
+            {
+                notificationService.ShowNotification(
+                    titulo: "Éxito",
+                    mensaje: "Guardado correctamente",
+                    NotificationSeverity.Success);
+                this.entradas = entradaDevuelta;
+            }
+        }
+        catch (Exception ex)
+        {
+            notificationService.ShowNotification(
+                titulo: "Error al guardar",
+                mensaje: ex.Message,
+                NotificationSeverity.Error);
+        }
+    }
+
+    public async Task Eliminar()
+    {
+        try
+        {
+            using var response = await httpClient.DeleteAsync($"api/Entradas/{entradas.EntradaId}");
+            response.EnsureSuccessStatusCode();
+            notificationService.ShowNotification(
+                titulo: "Éxito",
+                mensaje: "Eliminado con éxito",
+                NotificationSeverity.Success);
+            Nuevo();
+        }
+        catch (Exception ex)
+        {
+            notificationService.ShowNotification(
+                titulo: "Error al eliminar",
+                mensaje: ex.Message,
+                NotificationSeverity.Error);
         }
     }
 
@@ -221,49 +266,10 @@
         }
     }
 
-    public async Task Guardar()
-    {
-        using var response = await httpClient.PostAsJsonAsync("api/Entrada", entradas);
-
-        if (Validar())
-        {
-            if (!response.IsSuccessStatusCode)
-            {
-                return;
-            }
-
-            var entradaDevuelta = await response.Content.ReadFromJsonAsync<Entradas>();
-
-            if (entradaDevuelta is not null)
-            {
-                this.entradas = entradaDevuelta;
-                StateHasChanged();
-                Nuevo();
-            }
-        }
-    }
-
-    public async Task Eliminar()
-    {
-        using var response = await httpClient.DeleteAsync($"api/Entrada/{entradas.EntradaId}");
-
-        if (Validar())
-        {
-            if (!response.IsSuccessStatusCode)
-            {
-                return;
-            }
-            else
-            {
-                Nuevo();
-            }
-        }
-    }
-
     private async Task<Entradas> BuscarEntradas(int EntradaId)
     {
         Entradas entradas = new Entradas();
-        var entradaEncontrada = await httpClient.GetFromJsonAsync<Entradas>($"api/Entradas/{entradas.EntradaId}");
+        var entradaEncontrada = await httpClient.GetFromJsonAsync<Entradas>($"api/Entradas/{EntradaId}");
 
         if (entradaEncontrada != null)
         {
@@ -291,9 +297,9 @@
 
     public void EliminarDetalle(EntradasDetalle detalle)
     {
-        var detalleEncontrado = entradas.EntradasDetalles.First(e => e.DetalleId == detalle.DetalleId);
+        var detalleEncontrado = entradas.EntradasDetalles.FirstOrDefault(e => e.DetalleId == detalle.DetalleId);
 
-    if (detalleEncontrado != null)
+        if (detalleEncontrado != null)
         {
             var entrada = BuscarEntradas(detalleEncontrado.ProductoId);
             detalle = detalleEncontrado;
