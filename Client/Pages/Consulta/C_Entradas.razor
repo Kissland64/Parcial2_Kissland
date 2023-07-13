@@ -17,9 +17,10 @@
                     <InputSelect class="form-control col-2" @bind-Value="filtro">
                         <option value="1">EntradaId</option>
                         <option value="2">Fecha</option>
-                        <option value="3">PesoTotal</option>
-                        <option value="4">ProductoId</option>
-                        <option value="5">CantidadProducida</option>
+                        <option value="3">Concepto</option>
+                        <option value="4">PesoTotal</option>
+                        <option value="5">ProductoId</option>
+                        <option value="6">CantidadProducida</option>
                     </InputSelect>
 
                     <div class="flex-fill mx-2">
@@ -47,7 +48,6 @@
                         <th>Peso Total</th>
                         <th>ProductoId</th>
                         <th>Cantidad Producida</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,12 +55,11 @@
                     {
                         <tr>
                             <td>@entradas.EntradaId</td>
-                            <td>@entradas.Fecha</td>
+                            <td>@entradas.Fecha.ToString("dd/MM/yyyy")</td>
                             <td>@entradas.Concepto</td>
                             <td>@entradas.PesoTotal</td>
                             <td>@entradas.ProductoId</td>
-                            <td>@entradas.CantidadProducida</td>               
-                            <td><a href="Entradas/@entradas.EntradaId">Ver</a></td>
+                            <td>@entradas.CantidadProducida</td>
                         </tr>
                     }
 
@@ -80,15 +79,16 @@
 </div>
 
 @code {
-    public List<Entradas>? entradas { get; set; }
+    public List<Entradas>? entradas { get; set; } = new List<Entradas>();
     public int conteo { get; set; }
     public string filtro { get; set; }
     public string Criterio { get; set; }
 
+
     public async Task Buscar()
     {
-        entradas = await httpClient.GetFromJsonAsync<List<Entradas>>($"api/Entradas");
-
+        var entrada = await httpClient.GetFromJsonAsync<List<Entradas>>($"api/Entradas");
+        entradas = entrada;
         conteo = entradas != null ? entradas!.Count() : 0;
         StateHasChanged();
     }

@@ -49,17 +49,18 @@ namespace Parcial2_Kissland.Server.Migrations
                 name: "EntradasDetalle",
                 columns: table => new
                 {
-                    DetalleId = table.Column<int>(type: "INTEGER", nullable: false),
+                    DetalleId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     EntradaId = table.Column<int>(type: "INTEGER", nullable: false),
                     ProductoId = table.Column<int>(type: "INTEGER", nullable: false),
-                    CantidadUtilizada = table.Column<double>(type: "REAL", nullable: false)
+                    CantidadUtilizada = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EntradasDetalle", x => x.DetalleId);
                     table.ForeignKey(
-                        name: "FK_EntradasDetalle_Entradas_DetalleId",
-                        column: x => x.DetalleId,
+                        name: "FK_EntradasDetalle_Entradas_EntradaId",
+                        column: x => x.EntradaId,
                         principalTable: "Entradas",
                         principalColumn: "EntradaId",
                         onDelete: ReferentialAction.Cascade);
@@ -78,6 +79,11 @@ namespace Parcial2_Kissland.Server.Migrations
                     { 6, "Mixto MPC 0.5 lb", 0.0, 1 },
                     { 7, "Mixto MPP 0.2 lb", 0.0, 1 }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EntradasDetalle_EntradaId",
+                table: "EntradasDetalle",
+                column: "EntradaId");
         }
 
         /// <inheritdoc />

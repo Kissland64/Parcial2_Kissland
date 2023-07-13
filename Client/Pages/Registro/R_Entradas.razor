@@ -17,15 +17,8 @@
                     <label>Entrada Id:</label>
                     <div class="input-group mb-3">
                         <InputNumber @bind-Value="entradas.EntradaId" class="form-control" aria-describedby="BotonBuscar" />
-                        <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="oi oi-magnifying-glass"></i></button>
-                    </div>
-                </div>
-
-                <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
-                    <label>Producto Id:</label>
-                    <div class="input-group mb-3">
-                        <InputNumber @bind-Value="entradas.ProductoId" class="form-control" aria-describedby="BotonBuscar" />
-                        <button @onclick="Buscar" class="btn btn-outline-primary" type="button" id="BotonBuscar"><i class="oi oi-magnifying-glass"></i></button>
+                        <button @onclick="Buscar" class="btn btn-outline-primary" 
+                        type="button" id="BotonBuscar"><i class="oi oi-magnifying-glass"></i></button>
                     </div>
                 </div>
 
@@ -96,7 +89,7 @@
                     <div class="row d-flex justify-content-center">
                         <div class="col-5">
                             <label for="Total">Cantidades totales utilizadas:</label>
-                            <input @bind="@Total" disabled="true" type="text" class="form-control" />
+                            <input @bind-value="@Total" disabled="true" type="text" class="form-control" />
                         </div>
                     </div>
                 </fieldset>
@@ -108,7 +101,7 @@
                             <RadzenDropDown class="form-control" Data="@L_Productos" TextProperty="Descripcion" ValueProperty="ProductoId" @bind-Value="@entradas.ProductoId"></RadzenDropDown>
                         </div>
                         <div class="col-2">
-                            <input @bind="@entradas.CantidadProducida" type="text" class="form-control" placeholder="Cantidad" />
+                            <input disabled @bind-value="@entradas.CantidadProducida" type="text" class="form-control" placeholder="Cantidad" />
                         </div>
                     </div>
                 </fieldset>
@@ -150,6 +143,7 @@
     public void Nuevo()
     {
         this.entradas = new Entradas();
+        Total = 0;
         Mensaje = string.Empty;
     }
     
@@ -207,23 +201,19 @@
 
     public async Task Eliminar()
     {
-        try
+        using var response = await httpClient.DeleteAsync($"api/Entradas/{entradas.EntradaId}");
+
+        if(!response.IsSuccessStatusCode)
         {
-            using var response = await httpClient.DeleteAsync($"api/Entradas/{entradas.EntradaId}");
-            response.EnsureSuccessStatusCode();
-            notificationService.ShowNotification(
-                titulo: "Éxito",
-                mensaje: "Eliminado con éxito",
-                NotificationSeverity.Success);
+            return;
+        }
+        else
+        {
             Nuevo();
+            notificationService.ShowNotification(titulo: "Eliminado", mensaje: "El producto se ha eliminado correctamente", NotificationSeverity.Error);
         }
-        catch (Exception ex)
-        {
-            notificationService.ShowNotification(
-                titulo: "Error al eliminar",
-                mensaje: ex.Message,
-                NotificationSeverity.Error);
-        }
+
+        notificationService.ShowNotification(titulo: "No eliminado", mensaje: "No hay nada por eliminar", NotificationSeverity.Warning);
     }
 
     public bool Validar()
@@ -266,44 +256,59 @@
         }
     }
 
-    private async Task<Entradas> BuscarEntradas(int EntradaId)
+    private async Task<Productos> BuscarEntradas(int ProductoId)
     {
-        Entradas entradas = new Entradas();
-        var entradaEncontrada = await httpClient.GetFromJsonAsync<Entradas>($"api/Entradas/{EntradaId}");
+        var producto = await httpClient.GetFromJsonAsync<Productos>($"api/Productos/{ProductoId}");
 
-        if (entradaEncontrada != null)
+        if(producto == null)
         {
-            return entradas = entradaEncontrada;
+            return new Productos();
         }
-        else
-        {
-            return new Entradas();
-        }
+
+        return producto;
     }
 
-    public void AgregarDetalle()
+    public async Task AgregarDetalle()
     {
-        if (ValidarDetalle())
+        if(ValidarDetalle())
         {
-            if (entradas != null)
+            if(entradasDetalle.CantidadUtilizada <= 0)
             {
-                entradasDetalle.EntradaId = entradas.EntradaId;
+                notificationService.ShowNotification(titulo: "Error", mensaje: "La cantidad a utilizar debe ser mayor que cero", NotificationSeverity.Warning);
+                return;
+            }
 
+            var producto = await BuscarEntradas(entradasDetalle.ProductoId);
+
+            if(entradas != null)
+            {
+                int Suma = 0;
+
+                if(entradasDetalle.CantidadUtilizada > producto.Existencia)
+                {
+                    notificationService.ShowNotification(titulo: "Error", mensaje: "La cantidad a utilizar es mayor que la existencia del producto", NotificationSeverity.Warning);
+                    return;
+                }
+
+                entradasDetalle.EntradaId = entradas.EntradaId;
                 entradas.EntradasDetalles.Add(entradasDetalle);
                 entradasDetalle = new EntradasDetalle();
+
+                foreach (var item in entradas.EntradasDetalles)
+                {
+                    Suma += item.CantidadUtilizada;
+                    Total = Suma;
+                }
+                entradas.CantidadProducida = Total * 2;
             }
         }
     }
 
-    public void EliminarDetalle(EntradasDetalle detalle)
+    public void EliminarDetalle(EntradasDetalle entradasDetalle)
     {
-        var detalleEncontrado = entradas.EntradasDetalles.FirstOrDefault(e => e.DetalleId == detalle.DetalleId);
+        this.entradas.EntradasDetalles.Remove(entradasDetalle);
 
-        if (detalleEncontrado != null)
-        {
-            var entrada = BuscarEntradas(detalleEncontrado.ProductoId);
-            detalle = detalleEncontrado;
-            entradas.EntradasDetalles.Remove(detalle);
-        }
+        Total = this.entradas.EntradasDetalles.Sum(t => t.CantidadUtilizada);
+        entradas.CantidadProducida = Total * 2;
     }
 }

@@ -13,8 +13,7 @@ public class Entradas{
     public int ProductoId {get; set;}
     [Required(ErrorMessage = "Este campo es necesario")]
     public double CantidadProducida {get; set;}
-    [Required(ErrorMessage = "Este campo es necesario")]
 
-    [ForeignKey("DetalleId")]
+    [ForeignKey("EntradaId")]
     public ICollection<EntradasDetalle> EntradasDetalles { get; set; } = new List<EntradasDetalle>();
 }

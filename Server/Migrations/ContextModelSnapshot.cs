@@ -46,10 +46,11 @@ namespace Parcial2_Kissland.Server.Migrations
             modelBuilder.Entity("EntradasDetalle", b =>
                 {
                     b.Property<int>("DetalleId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<double>("CantidadUtilizada")
-                        .HasColumnType("REAL");
+                    b.Property<int>("CantidadUtilizada")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("EntradaId")
                         .HasColumnType("INTEGER");
@@ -58,6 +59,8 @@ namespace Parcial2_Kissland.Server.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("DetalleId");
+
+                    b.HasIndex("EntradaId");
 
                     b.ToTable("EntradasDetalle");
                 });
@@ -138,7 +141,7 @@ namespace Parcial2_Kissland.Server.Migrations
                 {
                     b.HasOne("Entradas", null)
                         .WithMany("EntradasDetalles")
-                        .HasForeignKey("DetalleId")
+                        .HasForeignKey("EntradaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
