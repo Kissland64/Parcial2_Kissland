@@ -1,0 +1,57 @@
+@page "/ProductosConsulta"
+@inject HttpClient httpClient
+
+
+<label>ID</label>
+<div class="input-group">
+    <InputNumber @bind-Value="productos.ProductoId" class="form-control"></InputNumber>
+    <button type="button" class="btn btn-outline-primary oi oi-magnifying-glass" @onclick="Buscar"></button>
+</div>
+
+@if (Productos != null)
+{
+    <table class="table table-bordered">
+        <thead>
+            <th>Producto ID</th>
+            <th>Descripcion</th>
+            <th>Tipo</th>
+            <th>Existencia</th>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Productos)
+            {
+                <tr>
+                    <th>@item.ProductoId</th>
+                    <th>@item.Descripcion</th>
+                    <th>@item.Tipo</th>
+                    <th>@item.Existencia</th>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code
+{
+    public Productos productos { get; set; } = new Productos();
+    public List<Productos> Productos { get; set; } = new List<Productos>();
+     public int Conteo { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var productos = await httpClient.GetFromJsonAsync<List<Productos>>("api/Productos");
+
+        if(productos is not null)
+        {
+            Productos = productos;
+        }
+    }
+
+    public async Task Buscar()
+    {
+        Productos = await httpClient.GetFromJsonAsync<List<Productos>>($"api/productos");
+        Conteo = Productos != null ? Productos!.Count() : 0;
+        StateHasChanged();
+    }
+}
