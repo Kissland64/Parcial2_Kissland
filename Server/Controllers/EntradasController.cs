@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Parcial2_Robert.Server.Controllers
+namespace Parcial2_Kissland.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
