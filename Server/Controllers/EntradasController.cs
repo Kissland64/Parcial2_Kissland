@@ -16,15 +16,15 @@ namespace Parcial2_Kissland.Server.Controllers
             _context = context;
         }
 
-        public bool Existe(int EntradaId)
+        public bool Existe(int id)
         {
-            return (_context.Entradas?.Any(e => e.EntradaId == EntradaId)).GetValueOrDefault();
+            return (_context.Entradas?.Any(e => e.EntradaId == id)).GetValueOrDefault();
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Entradas>>> Obtener()
         {
-            if(_context.Entradas == null)
+            if (_context.Entradas == null)
             {
                 return NotFound();
             }
@@ -37,37 +37,41 @@ namespace Parcial2_Kissland.Server.Controllers
         [HttpGet("{EntradaId}")]
         public async Task<ActionResult<Entradas>> ObtenerEntradas(int EntradaId)
         {
-            if(_context.Entradas == null)
+            if (_context.Entradas == null)
             {
                 return NotFound();
             }
 
-            var entrada = await _context.Entradas.Include(e => e.EntradasDetalles).Where( e => e.EntradaId == EntradaId).FirstOrDefaultAsync();
+            var entrada =  _context.Entradas
+                .Where(e => e.EntradaId == EntradaId)
+                .Include(e => e.EntradasDetalles)
+                .AsNoTracking()
+                .SingleOrDefault();
 
-            if(entrada == null)
+            if (entrada == null)
             {
                 return NotFound();
             }
 
-            foreach(var item in entrada.EntradasDetalles)
+            foreach (var item in entrada.EntradasDetalles)
             {
                 Console.WriteLine($"{item.DetalleId}, {item.EntradaId}, {item.ProductoId}, {item.CantidadUtilizada}");
             }
 
             return entrada;
         }
-        
+
         [HttpPost]
         public async Task<ActionResult<Entradas>> PostEntradas(Entradas entradas)
         {
-            if(!Existe(entradas.EntradaId))
+            if (!Existe(entradas.EntradaId))
             {
                 Productos? producto = new Productos();
-                foreach(var productoConsumido in entradas.EntradasDetalles)
+                foreach (var productoConsumido in entradas.EntradasDetalles)
                 {
                     producto = _context.Productos.Find(productoConsumido.ProductoId);
 
-                    if(producto != null)
+                    if (producto != null)
                     {
                         producto.Existencia -= productoConsumido.CantidadUtilizada;
                         _context.Productos.Update(producto);
@@ -84,30 +88,30 @@ namespace Parcial2_Kissland.Server.Controllers
 
                 Productos? producto = new Productos();
 
-                if(entradaAnterior != null && entradaAnterior.EntradasDetalles != null)
+                if (entradaAnterior != null && entradaAnterior.EntradasDetalles != null)
                 {
-                    foreach(var productoConsumido in entradaAnterior.EntradasDetalles)
+                    foreach (var productoConsumido in entradaAnterior.EntradasDetalles)
                     {
-                        if(productoConsumido != null)
+                        if (productoConsumido != null)
                         {
                             producto = _context.Productos.Find(productoConsumido.ProductoId);
 
-                            if(producto != null)
+                            if (producto != null)
                             {
-                                producto.Existencia +=  productoConsumido.CantidadUtilizada;
+                                producto.Existencia += productoConsumido.CantidadUtilizada;
                                 _context.Productos.Update(producto);
                                 await _context.SaveChangesAsync();
                                 _context.Entry(producto).State = EntityState.Detached;
-                            }   
+                            }
                         }
                     }
                 }
 
-                if(entradaAnterior != null)
+                if (entradaAnterior != null)
                 {
                     producto = _context.Productos.Find(entradaAnterior.ProductoId);
 
-                    if(producto != null)
+                    if (producto != null)
                     {
                         producto.Existencia -= entradaAnterior.CantidadProducida;
                         _context.Productos.Update(producto);
@@ -118,11 +122,11 @@ namespace Parcial2_Kissland.Server.Controllers
 
                 _context.Database.ExecuteSqlRaw($"Delete from entradasDetalle where EntradaId = {entradas.EntradaId}");
 
-                foreach(var productoConsumido in entradas.EntradasDetalles)
+                foreach (var productoConsumido in entradas.EntradasDetalles)
                 {
                     producto = _context.Productos.Find(productoConsumido.ProductoId);
 
-                    if(producto != null)
+                    if (producto != null)
                     {
                         producto.Existencia -= productoConsumido.CantidadUtilizada;
                         _context.Productos.Update(producto);
@@ -134,7 +138,7 @@ namespace Parcial2_Kissland.Server.Controllers
 
                 producto = _context.Productos.Find(entradas.ProductoId);
 
-                if(producto != null)
+                if (producto != null)
                 {
                     producto.Existencia += entradas.CantidadProducida;
                     _context.Productos.Update(producto);
@@ -159,23 +163,23 @@ namespace Parcial2_Kissland.Server.Controllers
                 return NotFound();
             }
 
-            foreach (var detalle in entrada.EntradasDetalles)
+            foreach (var productoConsumido in entrada.EntradasDetalles)
             {
-                var producto = await _context.Productos.FindAsync(detalle.ProductoId);
+                var producto = await _context.Productos.FindAsync(productoConsumido.ProductoId);
 
                 if (producto != null)
                 {
-                    producto.Existencia += detalle.CantidadUtilizada;
+                    producto.Existencia += productoConsumido.CantidadUtilizada;
                     _context.Productos.Update(producto);
                 }
             }
 
-            var productoPrincipal = await _context.Productos.FindAsync(entrada.ProductoId);
+            var productoInicial = await _context.Productos.FindAsync(entrada.ProductoId);
 
-            if (productoPrincipal != null)
+            if (productoInicial != null)
             {
-                productoPrincipal.Existencia += entrada.CantidadProducida;
-                _context.Productos.Update(productoPrincipal);
+                productoInicial.Existencia += entrada.CantidadProducida;
+                _context.Productos.Update(productoInicial);
             }
 
             _context.Entradas.Remove(entrada);

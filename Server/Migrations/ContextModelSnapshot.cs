@@ -32,8 +32,8 @@ namespace Parcial2_Kissland.Server.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("TEXT");
 
-                    b.Property<double>("PesoTotal")
-                        .HasColumnType("REAL");
+                    b.Property<decimal>("PesoTotal")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ProductoId")
                         .HasColumnType("INTEGER");
@@ -78,6 +78,9 @@ namespace Parcial2_Kissland.Server.Migrations
                     b.Property<double>("Existencia")
                         .HasColumnType("REAL");
 
+                    b.Property<decimal>("Peso")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Tipo")
                         .HasColumnType("INTEGER");
 
@@ -90,21 +93,24 @@ namespace Parcial2_Kissland.Server.Migrations
                         {
                             ProductoId = 1,
                             Descripcion = "Mani",
-                            Existencia = 50.0,
+                            Existencia = 700.0,
+                            Peso = 0m,
                             Tipo = 0
                         },
                         new
                         {
                             ProductoId = 2,
                             Descripcion = "Pistachos",
-                            Existencia = 600.0,
+                            Existencia = 700.0,
+                            Peso = 0m,
                             Tipo = 0
                         },
                         new
                         {
                             ProductoId = 3,
                             Descripcion = "Pasas",
-                            Existencia = 500.0,
+                            Existencia = 700.0,
+                            Peso = 0m,
                             Tipo = 0
                         },
                         new
@@ -112,6 +118,7 @@ namespace Parcial2_Kissland.Server.Migrations
                             ProductoId = 4,
                             Descripcion = "Ciruelas",
                             Existencia = 700.0,
+                            Peso = 0m,
                             Tipo = 0
                         },
                         new
@@ -119,6 +126,7 @@ namespace Parcial2_Kissland.Server.Migrations
                             ProductoId = 5,
                             Descripcion = "Mixto MPP 0.5 lb",
                             Existencia = 0.0,
+                            Peso = 0m,
                             Tipo = 1
                         },
                         new
@@ -126,6 +134,7 @@ namespace Parcial2_Kissland.Server.Migrations
                             ProductoId = 6,
                             Descripcion = "Mixto MPC 0.5 lb",
                             Existencia = 0.0,
+                            Peso = 0m,
                             Tipo = 1
                         },
                         new
@@ -133,6 +142,7 @@ namespace Parcial2_Kissland.Server.Migrations
                             ProductoId = 7,
                             Descripcion = "Mixto MPP 0.2 lb",
                             Existencia = 0.0,
+                            Peso = 0m,
                             Tipo = 1
                         });
                 });

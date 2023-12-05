@@ -33,78 +33,86 @@
                     <InputText @bind-Value="entradas.Concepto" class="form-control" />
                     <ValidationMessage For="() => entradas.Concepto" />
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label" for="PesoTotal">PesoTotal:</label>
-                    <InputNumber @bind-Value="entradas.PesoTotal" class="form-control" />
-                    <ValidationMessage For="() => entradas.PesoTotal" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label" for="CantidadProducida">CantidadProducida:</label>
-                    <InputNumber @bind-Value="entradas.CantidadProducida" class="form-control" />
-                    <ValidationMessage For="() => entradas.CantidadProducida" />
-                </div>
-
-                <hr>
-                <fieldset>
-                    <legend>Utilizados:</legend>
-                    <div class="row">
-                        <div class="col-4">
-                            <label for="SelectP">Producto:</label>
-                            <RadzenDropDown class="form-control" Data="@L_Productos.Where(p => p.ProductoId != 5)" TextProperty="Descripcion" ValueProperty="ProductoId" @bind-Value="@entradasDetalle.ProductoId"></RadzenDropDown>
-                        </div>
-                        <div class="col-4">
-                            <label for="CantidadP">Cantidad:</label>
-                            <div class="input-group">
-                                <input @bind="@entradasDetalle.CantidadUtilizada" type="Text" id="CantidadP" class="form-control" />
-                                <button type="button" class="btn btn-dark" @onclick="AgregarDetalle">Agregar <i class="oi oi-plus" /></button>
-                            </div>
-                        </div>
-                    </div>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>ProductoId</th>
-                                <th>Descripción</th>
-                                <th>Cantidad</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in entradas.EntradasDetalles)
+                
+          @*Detalles:*@
+        <div class="card card-header">
+            <h3>Utilizados</h3>
+        </div>
+        <div class="card-body border border-1">
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Producto</label>
+                    <InputSelect @bind-Value="entradasDetalle.ProductoId" class="form-select">
+                        <option value="" hidden="hidden">Seleccione</option>
+                        @foreach (var p in L_Productos)
+                        {
+                            if(p.Tipo == 0)
                             {
-                                <tr>
-                                    <td>@item.ProductoId</td>
-                                    <td>@L_Productos.FirstOrDefault(p => p.ProductoId == item.ProductoId)?.Descripcion</td>
-                                    <td>@item.CantidadUtilizada</td>
-                                    <td>
-                                        <button class="btn btn-danger mr-2" onclick="@(() => EliminarDetalle(item))"><i class="oi oi-trash"></i></button>
-                                    </td>
-                                </tr>
+                                <option value="@p.ProductoId">@p.Descripcion</option>
+                            }    
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => entradasDetalle.ProductoId)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Cantidad</label>
+                    <div class="input-group">
+                        <InputNumber @bind-Value="entradasDetalle.CantidadUtilizada" class="form-control"></InputNumber>
+                        <button type="button" class="btn btn-success" @onclick="AgregarDetalle"><i class="oi oi-plus" />Agregar</button>
+                        <ValidationMessage For="@(() => entradasDetalle.CantidadUtilizada)" />
+                    </div>
+                </div>
+            </div> 
+        </div>
+        <table class='table table-responsive table-striped'>
+            <thead>
+                <tr>
+                    <th>Producto Id</th>
+                    <th>Descripci&oacute;n</th>
+                    <th>Cantidad</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in entradas.EntradasDetalles)
+                    {
+                        <tr>
+                            <td>@item.ProductoId</td>
+                            <td>@L_Productos.FirstOrDefault(p => p.ProductoId == item.ProductoId)?.Descripcion</td>
+                            <td>@item.CantidadUtilizada</td>
+                            <td>
+                                <td><button type="button" class="btn btn-danger" @onclick=@(() => EliminarDetalle(item))><i class="oi oi-trash" /></button></td>
+                            </td>
+                        </tr>
+                    }
+                    @*<tr>
+                        <td>Peso Total: @entradas.PesoTotal g</td>
+                    </tr>
+                    *@
+            </tbody>
+        </table>
+        <fieldset class="card card-header border border-1">
+            <legend>Producido</legend>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Producto:</label>
+                    <InputSelect @bind-Value="entradas.ProductoId" class="form-select">
+                        <option value="0" hidden="hidden">Seleccione</option>
+                        @foreach (var p in L_Productos)
+                        {
+                            if (p.Tipo == 1)
+                            {
+                                <option value="@p.ProductoId">@p.Descripcion</option>
                             }
-                        </tbody>
-                    </table>
-                    <hr>
-                    <div class="row d-flex justify-content-center">
-                        <div class="col-5">
-                            <label for="Total">Cantidades totales utilizadas:</label>
-                            <input @bind-value="@Total" disabled="true" type="text" class="form-control" />
-                        </div>
-                    </div>
-                </fieldset>
-                <hr>
-                <fieldset>
-                    <legend>Producido:</legend>
-                    <div class="row">
-                        <div class="col-3">
-                            <RadzenDropDown class="form-control" Data="@L_Productos" TextProperty="Descripcion" ValueProperty="ProductoId" @bind-Value="@entradas.ProductoId"></RadzenDropDown>
-                        </div>
-                        <div class="col-2">
-                            <input disabled @bind-value="@entradas.CantidadProducida" type="text" class="form-control" placeholder="Cantidad" />
-                        </div>
-                    </div>
-                </fieldset>
-
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-2">
+                    <label>Cantidad:</label>
+                    <input disabled @bind-value="@entradas.CantidadProducida" type="text" class="form-control" placeholder="Cantidad" />
+                </div>
+            </div>
+        </fieldset>
             </div>
             <div class="card-footer d-flex justify-content-center">
                 <div class="btn-group">
@@ -122,11 +130,16 @@
     [Parameter]
     public int EntradaId { get; set; }
     public int ProductoId { get; set; }
+    public int maniId { get; set; }
+    public int pasasId { get; set; }
+    public int pistachosId { get; set; }
+    public int ciruelasId { get; set; }
     public Entradas entradas { get; set; } = new Entradas();
     public EntradasDetalle entradasDetalle { get; set; } = new EntradasDetalle();
     public string Mensaje { get; set; } = string.Empty;
     public int Total { get; set; } = 0;
     public int Cantidad { get; set; }
+    public decimal pesoTotal { get; set; } = 0;
     public List<Productos> L_Productos { get; set; } = new List<Productos>();
     
     protected override async Task OnInitializedAsync()
@@ -182,6 +195,38 @@
     {
         try
         {
+            if (entradas.EntradasDetalles.Count == 0 || Total % 50 != 0)
+            {
+                notificationService.ShowNotification(
+                    titulo: "Error al guardar",
+                    mensaje: "No se puede guardar porque la cantidad necesaria por producto debe ser 50 para crear una bolsa.",
+                    NotificationSeverity.Warning);
+                return;
+            }
+
+            if (!Validar())
+            {
+                notificationService.ShowNotification(
+                    titulo: "Error al guardar",
+                    mensaje: "Por favor, complete todos los campos correctamente antes de guardar.",
+                    NotificationSeverity.Warning);
+                return;
+            }
+
+            // Verifica si hay al menos tres productos distintos en los detalles
+            var cantidadProductosDistintos = entradas.EntradasDetalles.Select(d => d.ProductoId).Distinct().Count();
+            if (cantidadProductosDistintos < 3)
+            {
+                notificationService.ShowNotification(
+                    titulo: "Error al guardar",
+                    mensaje: "Debe agregar al menos tres productos distintos antes de guardar.",
+                    NotificationSeverity.Warning);
+                return;
+            }
+
+            // Resto de tu código para guardar...
+
+            // Esta parte permanece sin cambios
             using var response = await httpClient.PostAsJsonAsync("api/Entradas", entradas);
             response.EnsureSuccessStatusCode();
 
@@ -192,7 +237,12 @@
                     titulo: "Éxito",
                     mensaje: "Guardado correctamente",
                     NotificationSeverity.Success);
+
                 this.entradas = entradaDevuelta;
+                this.entradas.EntradasDetalles.Clear();
+                Total = 0;
+
+                Nuevo();
             }
         }
         catch (Exception ex)
@@ -203,6 +253,8 @@
                 NotificationSeverity.Error);
         }
     }
+
+
 
     public async Task Eliminar()
     {
@@ -274,9 +326,9 @@
 
     public async Task AgregarDetalle()
     {
-        if(ValidarDetalle())
+        if (ValidarDetalle())
         {
-            if(entradasDetalle.CantidadUtilizada <= 0)
+            if (entradasDetalle.CantidadUtilizada <= 0)
             {
                 notificationService.ShowNotification(titulo: "Error", mensaje: "La cantidad a utilizar debe ser mayor que cero", NotificationSeverity.Warning);
                 return;
@@ -284,11 +336,17 @@
 
             var producto = await BuscarEntradas(entradasDetalle.ProductoId);
 
-            if(entradas != null)
+            if (producto != null)
             {
+                if (entradas.EntradasDetalles.Any(d => d.ProductoId == entradasDetalle.ProductoId))
+                {
+                    notificationService.ShowNotification(titulo: "Error", mensaje: "El producto ya ha sido agregado", NotificationSeverity.Warning);
+                    return;
+                }
+
                 int Suma = 0;
 
-                if(entradasDetalle.CantidadUtilizada > producto.Existencia)
+                if (entradasDetalle.CantidadUtilizada > producto.Existencia)
                 {
                     notificationService.ShowNotification(titulo: "Error", mensaje: "La cantidad a utilizar es mayor que la existencia del producto", NotificationSeverity.Warning);
                     return;
@@ -303,16 +361,47 @@
                     Suma += item.CantidadUtilizada;
                     Total = Suma;
                 }
-                entradas.CantidadProducida = Total * 2;
+
+                const int CantidadNecesariaPorBolsa = 50;
+                const int TiposDeProductosNecesarios = 3;
+
+                if (Total % CantidadNecesariaPorBolsa != 0 || entradas.EntradasDetalles.Select(d => d.ProductoId).Distinct().Count() < TiposDeProductosNecesarios)
+                {
+                    notificationService.ShowNotification(titulo: "Error", mensaje: $"Debe agregar al menos {CantidadNecesariaPorBolsa} productos y de al menos {TiposDeProductosNecesarios} tipos diferentes antes de guardar el detalle", NotificationSeverity.Warning);
+                    entradas.EntradasDetalles.Remove(entradasDetalle);
+
+                    return;
+                }
+
+                int bolsasProducidas = Total / CantidadNecesariaPorBolsa;
+                entradas.CantidadProducida = bolsasProducidas;
+
+                var detallesEspecificos = entradas.EntradasDetalles
+                    .Where(d => d.ProductoId == maniId || d.ProductoId == pasasId || d.ProductoId == pistachosId || d.ProductoId == ciruelasId)
+                    .ToList();
+
+                entradas.PesoTotal = detallesEspecificos.Sum(d => d.CantidadUtilizada * L_Productos.FirstOrDefault(p => p.ProductoId == d.ProductoId)?.Peso ?? 0);
+
+                var cantidadProducto = entradas.EntradasDetalles.Count(d => d.ProductoId == entradasDetalle.ProductoId);
+                if (cantidadProducto % CantidadNecesariaPorBolsa == 0)
+                {
+                    entradasDetalle = new EntradasDetalle();
+                }
             }
         }
     }
-
+    
     public void EliminarDetalle(EntradasDetalle entradasDetalle)
     {
         this.entradas.EntradasDetalles.Remove(entradasDetalle);
 
         Total = this.entradas.EntradasDetalles.Sum(t => t.CantidadUtilizada);
-        entradas.CantidadProducida = Total * 2;
+        entradas.CantidadProducida = Total * 1;
+
+        notificationService.ShowNotification(
+            titulo: "Detalle Eliminado",
+            mensaje: "El detalle se ha eliminado correctamente",
+            NotificationSeverity.Success);
+
     }
 }

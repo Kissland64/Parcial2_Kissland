@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Parcial2_Kissland.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class Data : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,7 +21,7 @@ namespace Parcial2_Kissland.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Fecha = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Concepto = table.Column<string>(type: "TEXT", nullable: false),
-                    PesoTotal = table.Column<double>(type: "REAL", nullable: false),
+                    PesoTotal = table.Column<decimal>(type: "TEXT", nullable: false),
                     ProductoId = table.Column<int>(type: "INTEGER", nullable: false),
                     CantidadProducida = table.Column<double>(type: "REAL", nullable: false)
                 },
@@ -38,7 +38,8 @@ namespace Parcial2_Kissland.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Descripcion = table.Column<string>(type: "TEXT", nullable: false),
                     Tipo = table.Column<int>(type: "INTEGER", nullable: false),
-                    Existencia = table.Column<double>(type: "REAL", nullable: false)
+                    Existencia = table.Column<double>(type: "REAL", nullable: false),
+                    Peso = table.Column<decimal>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -68,16 +69,16 @@ namespace Parcial2_Kissland.Server.Migrations
 
             migrationBuilder.InsertData(
                 table: "Productos",
-                columns: new[] { "ProductoId", "Descripcion", "Existencia", "Tipo" },
+                columns: new[] { "ProductoId", "Descripcion", "Existencia", "Peso", "Tipo" },
                 values: new object[,]
                 {
-                    { 1, "Mani", 50.0, 0 },
-                    { 2, "Pistachos", 600.0, 0 },
-                    { 3, "Pasas", 500.0, 0 },
-                    { 4, "Ciruelas", 700.0, 0 },
-                    { 5, "Mixto MPP 0.5 lb", 0.0, 1 },
-                    { 6, "Mixto MPC 0.5 lb", 0.0, 1 },
-                    { 7, "Mixto MPP 0.2 lb", 0.0, 1 }
+                    { 1, "Mani", 700.0, 0m, 0 },
+                    { 2, "Pistachos", 700.0, 0m, 0 },
+                    { 3, "Pasas", 700.0, 0m, 0 },
+                    { 4, "Ciruelas", 700.0, 0m, 0 },
+                    { 5, "Mixto MPP 0.5 lb", 0.0, 0m, 1 },
+                    { 6, "Mixto MPC 0.5 lb", 0.0, 0m, 1 },
+                    { 7, "Mixto MPP 0.2 lb", 0.0, 0m, 1 }
                 });
 
             migrationBuilder.CreateIndex(

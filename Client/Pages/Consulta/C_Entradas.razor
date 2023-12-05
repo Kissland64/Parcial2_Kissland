@@ -1,73 +1,78 @@
 @page "/EntradasConsulta"
-
 @inject HttpClient httpClient
 
 <div class="card">
-    <div class="card">
-
-        <div class="card-header">
-            <h3> Consulta de entradas </h3>
-        </div>
-
-        <div class="card-body">
-
-            <form>
-                <div class="input-group d-flex align-items-end">
-
-                    <InputSelect class="form-control col-2" @bind-Value="filtro">
-                        <option value="1">EntradaId</option>
-                        <option value="2">Fecha</option>
-                        <option value="3">Concepto</option>
-                        <option value="4">PesoTotal</option>
-                        <option value="5">ProductoId</option>
-                        <option value="6">CantidadProducida</option>
-                    </InputSelect>
-
-                    <div class="flex-fill mx-2">
-
-                        <div class="input-group">
-                            <label class="input-group-text"> Busqueda </label>
-                            <InputText class="form-control" @bind-Value="Criterio" />
-                        </div>
-
-                    </div>
-
-                    <button type="button" class="btn btn-sm-10 btn-primary" @onclick="Buscar"> <span class="oi oi-magnifying-glass"></span> Buscar </button>
-                </div>
-            </form>
-
-        </div>
-        @if (entradas is not null)
-        {
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>EntradaId</th>
-                        <th>Fecha</th>
-                        <th>Concepto</th>
-                        <th>Peso Total</th>
-                        <th>ProductoId</th>
-                        <th>Cantidad Producida</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var entradas in entradas)
-                    {
-                        <tr>
-                            <td>@entradas.EntradaId</td>
-                            <td>@entradas.Fecha.ToString("dd/MM/yyyy")</td>
-                            <td>@entradas.Concepto</td>
-                            <td>@entradas.PesoTotal</td>
-                            <td>@entradas.ProductoId</td>
-                            <td>@entradas.CantidadProducida</td>
-                        </tr>
-                    }
-
-                </tbody>
-
-            </table>
-        }
+    <div class="card-header">
+        <h3>Consulta de entradas</h3>
     </div>
+
+    <div class="card-body">
+        <form>
+            <div class="row">
+                <div class="form-group col-3">
+                    <label>Desde</label>
+                    <InputDate @bind-Value="fechaDesde" class="form-control" />
+                </div>
+                <div class="form-group col-3">
+                    <label>Hasta</label>
+                    <InputDate @bind-Value="fechaHasta" class="form-control" />
+                </div>
+            </div>
+            <h1></h1>
+            <div class="input-group d-flex align-items-end">
+                <InputSelect class="form-select col-2" @bind-Value="filtro">
+                    <option value="0">Sin filtro</option>
+                    <option value="1">ID de Entrada</option>
+                    <option value="2">ID de Producto</option>
+                    <option value="3">Concepto</option>
+                </InputSelect>
+
+                <div class="flex-fill mx-2">
+                    <div class="input-group">
+                        <label class="input-group-text"> Búsqueda </label>
+                        <InputText class="form-control" @bind-Value="Criterio" />
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-sm-10 btn-primary" @onclick="Buscar">
+                    <span class="oi oi-magnifying-glass"></span> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    @if (Listentradas is not null && Listentradas.Any())
+    {
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID de Entrada</th>
+                    <th>Fecha</th>
+                    <th>Concepto</th>
+                    <th>ID de Producto</th>
+                    <th>Cantidad Producida</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entrada in Listentradas)
+                {
+                    <tr>
+                        <td>@entrada.EntradaId</td>
+                        <td>@entrada.Fecha.ToString("dd/MM/yyyy")</td>
+                        <td>@entrada.Concepto</td>
+                        <td>@entrada.ProductoId</td>
+                        <td>@entrada.CantidadProducida</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No se encontraron resultados.</p>
+        <p>Si no encuentra el campo deseado ajuste la fecha</p>
+    }
+
     <div class="card-footer">
         <div class="form-row justify-content-sm-between" aria-orientation="vertical">
             <div class="col-3">
@@ -79,17 +84,52 @@
 </div>
 
 @code {
-    public List<Entradas>? entradas { get; set; } = new List<Entradas>();
-    public int conteo { get; set; }
-    public string filtro { get; set; }
-    public string Criterio { get; set; }
+    private List<Entradas> Listentradas;
+    private List<Entradas> ListentradasOriginal;
+    private int conteo;
+    private string filtro = "0";
+    private string Criterio;
+    private DateTime fechaDesde;
+    private DateTime fechaHasta;
 
-
-    public async Task Buscar()
+    protected override async Task OnInitializedAsync()
     {
-        var entrada = await httpClient.GetFromJsonAsync<List<Entradas>>($"api/Entradas");
-        entradas = entrada;
-        conteo = entradas != null ? entradas!.Count() : 0;
-        StateHasChanged();
+        fechaDesde = DateTime.Now.AddMonths(-11);
+        fechaHasta = DateTime.Now;
+        await Buscar();
+    }
+
+    private async Task Buscar()
+    {
+        ListentradasOriginal = await httpClient.GetFromJsonAsync<List<Entradas>>("api/Entradas");
+        Listentradas = new List<Entradas>(ListentradasOriginal);
+
+        if (!string.IsNullOrEmpty(Criterio) && !string.IsNullOrEmpty(filtro))
+        {
+            switch (filtro)
+            {
+                case "1":
+                    if (int.TryParse(Criterio, out int EntradaId))
+                    {
+                        Listentradas = Listentradas.Where(c => c.EntradaId == EntradaId).ToList();
+                    }
+                    break;
+                case "2":
+                    if (int.TryParse(Criterio, out int ProductoId))
+                    {
+                        Listentradas = Listentradas.Where(c => c.ProductoId == ProductoId).ToList();
+                    }
+                    break;
+                case "3":
+                    Listentradas = Listentradas.Where(c => c.Concepto.Contains(Criterio, StringComparison.OrdinalIgnoreCase)).ToList();
+                    break;
+            }
+        }
+
+        Listentradas = Listentradas
+            .Where(c => c.Fecha.Date >= fechaDesde.Date && c.Fecha.Date <= fechaHasta.Date)
+            .ToList();
+
+        conteo = Listentradas != null ? Listentradas.Count() : 0;
     }
 }
