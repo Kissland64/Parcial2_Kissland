@@ -212,8 +212,7 @@
                     NotificationSeverity.Warning);
                 return;
             }
-
-            // Verifica si hay al menos tres productos distintos en los detalles
+            
             var cantidadProductosDistintos = entradas.EntradasDetalles.Select(d => d.ProductoId).Distinct().Count();
             if (cantidadProductosDistintos < 3)
             {
@@ -224,9 +223,6 @@
                 return;
             }
 
-            // Resto de tu código para guardar...
-
-            // Esta parte permanece sin cambios
             using var response = await httpClient.PostAsJsonAsync("api/Entradas", entradas);
             response.EnsureSuccessStatusCode();
 
